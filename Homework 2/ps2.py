@@ -76,7 +76,14 @@ class RectangularRoom(object):
         width: an integer > 0
         height: an integer > 0
         """
-        raise NotImplementedError
+        self.width = width
+        self.height = height
+        self.tileSize = 1
+        self.numCleanTiles = 0
+        self.tiles = {}
+        for m in range(width):
+            for n in range(height):
+                self.tiles[(m,n)] = False
     
     def cleanTileAtPosition(self, pos):
         """
@@ -86,7 +93,12 @@ class RectangularRoom(object):
 
         pos: a Position
         """
-        raise NotImplementedError
+        m = math.floor(pos.getX())
+        n = math.floor(pos.getY())
+        coords = (m,n)
+        if self.tiles[coords] == False:
+            self.numCleanTiles = self.numCleanTiles + 1
+            self.tiles[coords] = True
 
     def isTileCleaned(self, m, n):
         """
@@ -98,7 +110,7 @@ class RectangularRoom(object):
         n: an integer
         returns: True if (m, n) is cleaned, False otherwise
         """
-        raise NotImplementedError
+        return self.tiles[(m,n)] 
     
     def getNumTiles(self):
         """
@@ -106,7 +118,7 @@ class RectangularRoom(object):
 
         returns: an integer
         """
-        raise NotImplementedError
+        return self.tileSize * self.width * self.height
 
     def getNumCleanedTiles(self):
         """
@@ -114,7 +126,7 @@ class RectangularRoom(object):
 
         returns: an integer
         """
-        raise NotImplementedError
+        return self.numCleanTiles
 
     def getRandomPosition(self):
         """
@@ -122,7 +134,7 @@ class RectangularRoom(object):
 
         returns: a Position object.
         """
-        raise NotImplementedError
+        return Position(random.randrange(self.width), random.randrange(self.height))
 
     def isPositionInRoom(self, pos):
         """
@@ -131,7 +143,7 @@ class RectangularRoom(object):
         pos: a Position object.
         returns: True if pos is in the room, False otherwise.
         """
-        raise NotImplementedError
+        return (0 <= pos.getX() < self.width) and (0 <= pos.getY() < self.height)
 
 
 class Robot(object):
@@ -153,7 +165,12 @@ class Robot(object):
         room:  a RectangularRoom object.
         speed: a float (speed > 0)
         """
-        raise NotImplementedError
+        self.room = room
+        self.speed = speed
+        self.position = room.getRandomPosition()
+        self.direction = random.randrange(360)
+        
+        room.cleanTileAtPosition(self.position)
 
     def getRobotPosition(self):
         """
@@ -161,7 +178,7 @@ class Robot(object):
 
         returns: a Position object giving the robot's position.
         """
-        raise NotImplementedError
+        return self.position
     
     def getRobotDirection(self):
         """
@@ -170,7 +187,7 @@ class Robot(object):
         returns: an integer d giving the direction of the robot as an angle in
         degrees, 0 <= d < 360.
         """
-        raise NotImplementedError
+        return self.direction
 
     def setRobotPosition(self, position):
         """
@@ -178,7 +195,7 @@ class Robot(object):
 
         position: a Position object.
         """
-        raise NotImplementedError
+        self.position = position
 
     def setRobotDirection(self, direction):
         """
@@ -186,7 +203,7 @@ class Robot(object):
 
         direction: integer representing an angle in degrees
         """
-        raise NotImplementedError
+        self.direction = direction
 
     def updatePositionAndClean(self):
         """
@@ -214,10 +231,15 @@ class StandardRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        raise NotImplementedError
+        pos = self.position.getNewPosition(self.direction, self.speed)
+        if self.room.isPositionInRoom(pos):
+            self.setRobotPosition(pos)
+            self.room.cleanTileAtPosition(pos)
+        else:
+            self.setRobotDirection(random.randrange(360))
 
 # Uncomment this line to see your implementation of StandardRobot in action!
-##testRobotMovement(StandardRobot, RectangularRoom)
+testRobotMovement(StandardRobot, RectangularRoom)
 
 
 # === Problem 3
