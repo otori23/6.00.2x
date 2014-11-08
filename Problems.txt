@@ -1,0 +1,5 @@
+- Hat problem
+- Birthday problem
+- Buffon's needles - Week 3, Lecture 5 Estimating Pi Video
+- Estimating sqrt(2) - Week 3, L5 PROBLEM 3
+- Monty Hall
