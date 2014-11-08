@@ -239,7 +239,7 @@ class StandardRobot(Robot):
             self.setRobotDirection(random.randrange(360))
 
 # Uncomment this line to see your implementation of StandardRobot in action!
-testRobotMovement(StandardRobot, RectangularRoom)
+##testRobotMovement(StandardRobot, RectangularRoom)
 
 
 # === Problem 3
@@ -261,7 +261,22 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     robot_type: class of robot to be instantiated (e.g. StandardRobot or
                 RandomWalkRobot)
     """
-    raise NotImplementedError
+    for trial in range(num_trials):
+        #anim = ps2_visualize.RobotVisualization(num_robots, width, height)
+        room = RectangularRoom(width, height)
+        robots = [robot_type(room, speed) for r in range(num_robots)]
+        proportionCleaned = 0.0
+        timeSteps = []
+        numTicks = 0
+        while proportionCleaned < min_coverage and numTicks < 500:
+            #anim.update(room, robots)
+            map(lambda robot: robot.updatePositionAndClean(), robots)
+            proportionCleaned = float(room.getNumCleanedTiles())/float(room.getNumTiles())
+            numTicks += 1
+        #anim.done()
+        timeSteps.append(numTicks)
+    return float(sum(timeSteps)/len(timeSteps))  
+            
 
 # Uncomment this line to see how much your simulation takes on average
 ##print  runSimulation(1, 1.0, 10, 10, 0.75, 30, StandardRobot)
@@ -280,8 +295,14 @@ class RandomWalkRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        raise NotImplementedError
+        pos = self.position.getNewPosition(self.direction, self.speed)
+        if self.room.isPositionInRoom(pos):
+            self.setRobotPosition(pos)
+            self.room.cleanTileAtPosition(pos)
+        self.setRobotDirection(random.randrange(360))
 
+# Uncomment this line to see your implementation of StandardRobot in action!
+##testRobotMovement(RandomWalkRobot, RectangularRoom)
 
 def showPlot1(title, x_label, y_label):
     """
@@ -316,7 +337,7 @@ def showPlot2(title, x_label, y_label):
         aspect_ratios.append(float(width) / height)
         times1.append(runSimulation(2, 1.0, width, height, 0.8, 200, StandardRobot))
         times2.append(runSimulation(2, 1.0, width, height, 0.8, 200, RandomWalkRobot))
-    pylab.plot(aspect_ratios, times1)
+    #pylab.plot(aspect_ratios, times1)
     pylab.plot(aspect_ratios, times2)
     pylab.title(title)
     pylab.legend(('StandardRobot', 'RandomWalkRobot'))
@@ -332,6 +353,8 @@ def showPlot2(title, x_label, y_label):
 #
 #       (... your call here ...)
 #
+##showPlot1('Time to clean 80 percent of room', 'number of robots', 'time steps')
+
 
 #
 # 2) Write a function call to showPlot2 that generates an appropriately-labeled
@@ -339,3 +362,4 @@ def showPlot2(title, x_label, y_label):
 #
 #       (... your call here ...)
 #
+showPlot2('Time to clean 80 percent of room', 'room aspect ratio', 'time steps')
