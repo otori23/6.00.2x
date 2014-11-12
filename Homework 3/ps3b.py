@@ -35,20 +35,20 @@ class SimpleVirus(object):
         maxBirthProb: Maximum reproduction probability (a float between 0-1)        
         clearProb: Maximum clearance probability (a float between 0-1).
         """
-
-        # TODO
-
+        self.maxBirthProb = maxBirthProb
+        self.clearProb = clearProb
+        
     def getMaxBirthProb(self):
         """
         Returns the max birth probability.
         """
-        # TODO
+        return self.maxBirthProb
 
     def getClearProb(self):
         """
         Returns the clear probability.
         """
-        # TODO
+        return self.clearProb
 
     def doesClear(self):
         """ Stochastically determines whether this virus particle is cleared from the
@@ -56,10 +56,11 @@ class SimpleVirus(object):
         returns: True with probability self.getClearProb and otherwise returns
         False.
         """
-
-        # TODO
-
-    
+        result = False
+        if random.random() >= self.getClearProb:
+            result = True
+        return result    
+             
     def reproduce(self, popDensity):
         """
         Stochastically determines whether this virus particle reproduces at a
@@ -79,8 +80,10 @@ class SimpleVirus(object):
         maxBirthProb and clearProb values as this virus. Raises a
         NoChildException if this virus particle does not reproduce.               
         """
-
-        # TODO
+        if random.random() >= self.maxBirthProb * (1 - popDensity):
+            return SimpleVirus(self.maxBirthProb, self.clearProb)
+        else:
+            raise NoChildException()
 
 
 
@@ -100,21 +103,22 @@ class Patient(object):
 
         maxPop: the maximum virus population for this patient (an integer)
         """
-
-        # TODO
+        self.viruses = viruses[:]
+        self.maxPop = maxPop
+        self.popDensity = float(self.maxPop)/float(len(self.viruses))
 
     def getViruses(self):
         """
         Returns the viruses in this Patient.
         """
-        # TODO
+        return self.viruses[:]
 
 
     def getMaxPop(self):
         """
         Returns the max population.
         """
-        # TODO
+        return self.maxPop
 
 
     def getTotalPop(self):
@@ -122,8 +126,7 @@ class Patient(object):
         Gets the size of the current total virus population. 
         returns: The total virus population (an integer)
         """
-
-        # TODO        
+        return len(self.viruses)      
 
 
     def update(self):
@@ -132,7 +135,7 @@ class Patient(object):
         time step. update() should execute the following steps in this order:
         
         - Determine whether each virus particle survives and updates the list
-        of virus particles accordingly.   
+          of virus particles accordingly.   
         
         - The current population density is calculated. This population density
           value is used until the next call to update() 
@@ -144,11 +147,23 @@ class Patient(object):
         returns: The total virus population at the end of the update (an
         integer)
         """
+        viruses_copy = self.getViruses()
+        for virus in viruses_copy:
+            if virus.doesClear():
+                self.viruses.remove(virus)
+        
+        self.popDensity = float(self.getTotalPop())/float(self.getMaxPop())
 
-        # TODO
-
-
-
+        new_viruses = []
+        for virus in self.viruses:
+            try: 
+                new_viruses.append(virus.reproduce(self.popDensity))
+            except:
+                pass
+                
+        self.viruses.extend(new_viruses)
+        return self.getTotalPop()
+                
 #
 # PROBLEM 3
 #
