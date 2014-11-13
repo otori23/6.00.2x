@@ -56,10 +56,7 @@ class SimpleVirus(object):
         returns: True with probability self.getClearProb and otherwise returns
         False.
         """
-        result = False
-        if random.random() >= self.getClearProb:
-            result = True
-        return result    
+        return random.random() <= self.getClearProb()
              
     def reproduce(self, popDensity):
         """
@@ -80,8 +77,8 @@ class SimpleVirus(object):
         maxBirthProb and clearProb values as this virus. Raises a
         NoChildException if this virus particle does not reproduce.               
         """
-        if random.random() >= self.maxBirthProb * (1 - popDensity):
-            return SimpleVirus(self.maxBirthProb, self.clearProb)
+        if random.random() <= self.getMaxBirthProb() * (1 - popDensity):
+            return SimpleVirus(self.getMaxBirthProb(), self.getClearProb())
         else:
             raise NoChildException()
 
@@ -158,7 +155,7 @@ class Patient(object):
         for virus in self.viruses:
             try: 
                 new_viruses.append(virus.reproduce(self.popDensity))
-            except:
+            except NoChildException:
                 pass
                 
         self.viruses.extend(new_viruses)
@@ -182,10 +179,21 @@ def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
     clearProb: Maximum clearance probability (a float between 0-1)
     numTrials: number of simulation runs to execute (an integer)
     """
-
-    # TODO
-
-
+    timeSteps = 300
+    viruses = [SimpleVirus(maxBirthProb, clearProb) for v in range(numViruses)]
+    patient = Patient(viruses, maxPop)
+    virusPopulation = [0]*timeSteps
+    for trail in range(numTrials):
+        for i in range(timeSteps):
+            virusPopulation[i] += patient.update()
+    
+    avgVirusPopulation = map(lambda x: x/numTrials, virusPopulation)
+    pylab.figure()
+    pylab.plot(avgVirusPopulation)
+    pylab.title('Virus Population Dynamics')
+    pylab.xlabel('Number of Time Steps')
+    pylab.ylabel('Number of Viruses')
+    pylab.show()
 
 #
 # PROBLEM 4
@@ -405,3 +413,6 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
     """
 
     # TODO
+
+## TEST CODE
+simulationWithoutDrug(100, 1000, 0.1, 0.05, 100)
