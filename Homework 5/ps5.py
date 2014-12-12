@@ -35,7 +35,6 @@ def load_map(mapFilename):
     Returns:
         a directed graph representing the map
     """
-    # TODO
     print "Loading map from file..."
     g = WeightedDigraph()
     mapFileHandle = open('mit_map.txt', 'r')
@@ -85,9 +84,31 @@ def bruteForceSearch(digraph, start, end, maxTotalDist, maxDistOutdoors):
         If there exists no path that satisfies maxTotalDist and
         maxDistOutdoors constraints, then raises a ValueError.
     """
-    #TODO
-    pass
-
+    start = Node(start)
+    end = Node(end)
+    s = [[start]]
+    shortest = None
+    shortestTotal = float("inf")
+    while len(s) != 0:
+        tmpPath = s.pop()
+        lastNode = tmpPath[len(tmpPath) - 1]
+ 
+        if lastNode == end:
+            tmpTotal, tmpOutTotal = getDistanceTotals(tmpPath, digraph)
+            if tmpTotal < shortestTotal and tmpTotal <= maxTotalDist and tmpOutTotal <= maxDistOutdoors:
+                shortest = tmpPath
+                shortestTotal = tmpTotal
+        
+        for linkNode in digraph.childrenOf(lastNode):
+            if linkNode not in tmpPath:
+                newPath = tmpPath + [linkNode]
+                s.append(newPath)
+        
+    if shortest == None:
+        raise ValueError('bruteForceSearch: No path found')
+    else:  
+        return map(lambda x: str(x), shortest)
+    
 #
 # Problem 4: Finding the Shorest Path using Optimized Search Method
 #
@@ -116,23 +137,60 @@ def directedDFS(digraph, start, end, maxTotalDist, maxDistOutdoors):
         If there exists no path that satisfies maxTotalDist and
         maxDistOutdoors constraints, then raises a ValueError.
     """
-    #TODO
-    pass
+    start = Node(start)
+    end = Node(end)
+    s = [[start]]
+    shortest = None
+    shortestTotal = float("inf")
+    while len(s) != 0:
+        tmpPath = s.pop()
+        lastNode = tmpPath[len(tmpPath) - 1]
+ 
+        if lastNode == end:
+            tmpTotal, tmpOutTotal = getDistanceTotals(tmpPath, digraph)
+            if tmpTotal < shortestTotal and tmpTotal <= maxTotalDist and tmpOutTotal <= maxDistOutdoors:
+                shortest = tmpPath
+                shortestTotal = tmpTotal
+        
+        for linkNode in digraph.childrenOf(lastNode):
+            if linkNode not in tmpPath:
+                newPath = tmpPath + [linkNode]
+                newPathTotal, newPathOutTotal = getDistanceTotals(newPath, digraph)
+                if newPathTotal < shortestTotal:
+                    s.append(newPath)
+        
+    if shortest == None:
+        raise ValueError('bruteForceSearch: No path found')
+    else:  
+        return map(lambda x: str(x), shortest)
 
+def getDistanceTotals(tmpPath, digraph):
+    totalDist = 0
+    totalDistOutdoors = 0
+    for i in range(len(tmpPath)-1):
+        src = tmpPath[i]
+        for dstInfo in digraph.edges[src]:
+            if tmpPath[i+1] == dstInfo[0]:
+                totalDist += dstInfo[1][0]
+                totalDistOutdoors += dstInfo[1][1]
+                
+    return (totalDist, totalDistOutdoors)
+    
+            
 # Uncomment below when ready to test
 #### NOTE! These tests may take a few minutes to run!! ####
-# if __name__ == '__main__':
-#     Test cases
+#if __name__ == '__main__':
+#     # Test cases
 #     mitMap = load_map("mit_map.txt")
 #     print isinstance(mitMap, Digraph)
 #     print isinstance(mitMap, WeightedDigraph)
 #     print 'nodes', mitMap.nodes
 #     print 'edges', mitMap.edges
-
-
+#
+#
 #     LARGE_DIST = 1000000
-
-#     Test case 1
+#
+#     # Test case 1
 #     print "---------------"
 #     print "Test case 1:"
 #     print "Find the shortest-path from Building 32 to 56"
